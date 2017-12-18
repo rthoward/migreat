@@ -1,0 +1,11 @@
+{
+  "name": "migreat",
+  "version": "0.0.11",
+  "description": "A simple, low-assumption migration tool.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Richard Howard",
+  "license": "ISC"
+}
