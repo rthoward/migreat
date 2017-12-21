@@ -33,18 +33,26 @@ async function invoke(env) {
         const dbCommand = process.argv[2];
         const settings = loadSettings(env.configPath);
 
-        if (dbCommand === 'gen') {
-            await migreat.gen(settings);
-        } else if (dbCommand === 'up') {
-            let targetVersion = _.toInteger(process.argv[3]);
-            await migreat.up(settings, targetVersion);
-        } else if (dbCommand === 'down') {
-            let targetVersion = _.toInteger(process.argv[3]);
-            await migreat.down(settings, targetVersion);
-        } else if (dbCommand == 'settings') {
-            console.log(settings);
-        } else {
-            printHelp();
+        switch (dbCommand) {
+            case 'gen':
+                await migreat.gen(settings);
+                break;
+            case 'up':
+                let targetVersion = _.toInteger(process.argv[3]);
+                await migreat.up(settings, targetVersion);
+                break;
+            case 'down':
+                let targetVersion = _.toInteger(process.argv[3]);
+                await migreat.down(settings, targetVersion);
+                break;
+            case 'list':
+                break;
+            case 'settings':
+                console.log(settings);
+                break;
+            default:
+                printHelp();
+                break;
         }
         process.exit();
     } catch(error) {
