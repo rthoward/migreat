@@ -1,0 +1,10 @@
+version: '3'
+services:
+  db:
+    image: postgres:10.1
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=migreat
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
