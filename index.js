@@ -18,7 +18,7 @@ function loadSettings(settingsFilePath) {
 
 function printHelp() {
     console.log(`
-Usage: migrate <command> [...args]
+Usage: migreat <command> [...args]
 
 Commands:
     gen         <label>             Create a new migration
