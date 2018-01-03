@@ -43,7 +43,7 @@ async function invoke(env) {
                 await migreat.up(settings, targetVersion);
                 break;
             case 'down':
-                let targetVersion = _.toInteger(process.argv[3]);
+                targetVersion = _.toInteger(process.argv[3]);
                 await migreat.down(settings, targetVersion);
                 break;
             case 'list':
