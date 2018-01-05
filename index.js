@@ -33,13 +33,15 @@ async function invoke(env) {
         const dbCommand = process.argv[2];
         const settings = loadSettings(env.configPath);
 
+        let targetVersion = null;
+
         switch (dbCommand) {
             case 'gen':
                 const label = process.argv[3];
                 await migreat.gen(settings, label);
                 break;
             case 'up':
-                let targetVersion = _.toInteger(process.argv[3]);
+                targetVersion = _.toInteger(process.argv[3]);
                 await migreat.up(settings, targetVersion);
                 break;
             case 'down':
