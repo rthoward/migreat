@@ -26,6 +26,7 @@ describe('migreat integration', () => {
     let tmpDir;
 
     before(async function() {
+        migreat.TEST = true;
         this.timeout(30000);
         await exec('docker-compose -f integration_tests/docker-compose.yml start');
         db = await dbConnect();
@@ -36,16 +37,13 @@ describe('migreat integration', () => {
         await db.end();
     });
 
-
     describe('gen()', function() {
-
         beforeEach(function() {
             tmpDir = tmp.dirSync({unsafeCleanup: true});
             settings.migrationDir = tmpDir.name;
         });
 
-        afterEach(async function() {
-            await migreat.down(settings);
+        afterEach(function() {
             tmpDir.removeCallback();
         });
 
@@ -72,14 +70,12 @@ describe('migreat integration', () => {
     });
 
     describe('status()', function() {
-
         beforeEach(function() {
             tmpDir = tmp.dirSync({unsafeCleanup: true});
             settings.migrationDir = tmpDir.name;
         });
 
-        afterEach(async function() {
-            await migreat.down(settings);
+        afterEach(function() {
             tmpDir.removeCallback();
         });
 
@@ -118,4 +114,106 @@ describe('migreat integration', () => {
 
     })
 
+    describe('up()', function() {
+        beforeEach(async function() {
+            tmpDir = tmp.dirSync({unsafeCleanup: true});
+            settings.migrationDir = tmpDir.name;
+            await db.query('BEGIN');
+        });
+
+        afterEach(async function() {
+            await db.query('ROLLBACK')
+            tmpDir.removeCallback();
+        });
+
+        it('can run multiple migrations from an unmigrated state', async function() {
+            await migreat.gen(settings, 'a');
+            await migreat.gen(settings, 'b');
+            await migreat.gen(settings, 'c');
+
+            await migreat.up(settings);
+            const { migrations, currentVersion } = await migreat.status(settings);
+
+            expect(currentVersion).to.equal(_.last(migrations).version);
+            expect(migrations[0]).to.include({label: 'a', run: true})
+            expect(migrations[1]).to.include({label: 'b', run: true})
+            expect(migrations[2]).to.include({label: 'c', run: true})
+        });
+
+        it('can run one migration to a partially migrated state', async function() {
+            await migreat.gen(settings, 'a');
+            await migreat.gen(settings, 'b');
+            await migreat.gen(settings, 'c');
+
+            const _status = await migreat.status(settings);
+            const targetVersion = _status.migrations[0].version;
+            await migreat.up(settings, targetVersion);
+            const { migrations, currentVersion } = await migreat.status(settings);
+
+            expect(currentVersion).to.equal(_.first(migrations).version);
+            expect(migrations[0]).to.include({label: 'a', run: true})
+            expect(migrations[1]).to.include({label: 'b', run: false})
+            expect(migrations[2]).to.include({label: 'c', run: false})
+        });
+
+        it('can run multiple migrations from a partially migrated state', async function() {
+            await migreat.gen(settings, 'a');
+            await migreat.gen(settings, 'b');
+            await migreat.gen(settings, 'c');
+
+            // migrate up to a
+            const _status = await migreat.status(settings);
+            const targetVersion = _status.migrations[0].version;
+            await migreat.up(settings, targetVersion);
+
+            // migrate up to c
+            await migreat.up(settings);
+            const { migrations, currentVersion } = await migreat.status(settings);
+
+            expect(currentVersion).to.equal(_.last(migrations).version);
+            expect(migrations[0]).to.include({label: 'a', run: true})
+            expect(migrations[1]).to.include({label: 'b', run: true})
+            expect(migrations[2]).to.include({label: 'c', run: true})
+        });
+    });
+
+    describe('down()', function() {
+        beforeEach(function() {
+            tmpDir = tmp.dirSync({unsafeCleanup: true});
+            settings.migrationDir = tmpDir.name;
+        });
+
+        afterEach(async function() {
+            await migreat.down(settings);
+            tmpDir.removeCallback();
+        });
+
+        it('can rollback all migrations from a fully migrated state', async function() {
+            await migreat.gen(settings, 'a');
+            await migreat.gen(settings, 'b');
+            await migreat.gen(settings, 'c');
+
+            await migreat.up(settings);
+            await migreat.down(settings);
+            const { currentVersion } = await migreat.status(settings);
+
+            expect(currentVersion).to.equal(0);
+        });
+
+        it('can partially rollback from a fully migrated state', async function() {
+            await migreat.gen(settings, 'a');
+            await migreat.gen(settings, 'b');
+            await migreat.gen(settings, 'c');
+
+            // migrate up to c
+            await migreat.up(settings);
+            const _status = await migreat.status(settings);
+            const migrationA = _status.migrations[0];
+            // migrate down to a
+            await migreat.down(settings, migrationA.version)
+            const { migrations, currentVersion } = await migreat.status(settings);
+
+            expect(currentVersion).to.equal(migrationA.version);
+        });
+    });
 });

@@ -1,6 +1,6 @@
 {
   "name": "migreat",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "A simple, low-assumption migration tool.",
   "preferGobal": true,
   "bin": {

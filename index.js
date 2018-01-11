@@ -9,7 +9,7 @@ const migreat = require('./lib');
 
 function loadSettings(settingsFilePath) {
     if (_.isNil(fs.lstatSync(settingsFilePath))) {
-        console.log("Error: Could not read settings file. There should be a .migreat.js in thir (or a parent) dir.");
+        console.log("Error: Could not read settings file. There should be a .migreat.js in this (or a parent) dir.");
         process.exit(1);
     }
     const settings = require(settingsFilePath);
@@ -22,8 +22,8 @@ Usage: migreat <command> [...args]
 
 Commands:
     gen         <label>             Create a new migration
-    up          <to_revision>       Migrate to to_revision, or latest
-    down        <to_revision>       Rollback to to_revision, or initial state
+    up          <to_revision>       Migrate to to_revision, default latest
+    down        <to_revision>       Rollback to to_revision, default initial (unmigrated) state
     settings                        List settings
 `)
 }

@@ -26,12 +26,12 @@ describe('migreat', () => {
         });
 
         it('can calculate a forward migration path', () => {
-            const path = migreat.upPath(migrations, 0, 0);
+            const path = migreat.upPath(migrations, 0, Number.MAX_SAFE_INTEGER);
             expect(path.map(m => (m.version))).to.eql(versions);
         });
 
         it('can calculate a forward migration path from an already migrated state', () => {
-            const path = migreat.upPath(migrations, 2, 0);
+            const path = migreat.upPath(migrations, 2, Number.MAX_SAFE_INTEGER);
             expect(path.map(m => (m.version))).to.eql([3, 4, 5]);
         });
 
