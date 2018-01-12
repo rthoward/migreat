@@ -2,7 +2,7 @@
 
 ## Getting started
 
-1. Create a .migreat.js file that exports a database connection and migration file dir:
+1. Create a `.migreat.js` file that exports a database connection and migration file dir:
 
 ```js
 const dbConnection = require('./lib/db');
@@ -16,11 +16,11 @@ module.exports = {
 
 2. Create a migration:
 
-`migreat gen my_first_migration`
+`$ migreat gen my_first_migration`
 
 3. Edit it:
 
-`vim migrations/1513098322271__my_first_migration.js`
+`$ vim migrations/1513098322271__my_first_migration.js`
 
 ```js
 module.exports = {
@@ -41,7 +41,7 @@ module.exports = {
 ```
 4. Migrate:
 
-`migreat up`
+`$ migreat up`
 
 ## Details
 
