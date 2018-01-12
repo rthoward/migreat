@@ -24,8 +24,19 @@ Commands:
     gen         <label>             Create a new migration
     up          <to_revision>       Migrate to to_revision, default latest
     down        <to_revision>       Rollback to to_revision, default initial (unmigrated) state
-    settings                        List settings
+    status                          Show migration status
 `)
+}
+
+function printStatus(status) {
+    console.log(`Current version is ${status.currentVersion}.`);
+    status.migrations.forEach(m => {
+        const label = (m.label || '<no label>');
+        const labelStr = label.padEnd(24);
+        const migrationStatus = m.run ? 'migrated' : 'pending';
+
+        console.log(`   ${labelStr} ${m.version}   ${migrationStatus}`);
+    })
 }
 
 async function invoke(env) {
@@ -50,8 +61,9 @@ async function invoke(env) {
                 break;
             case 'list':
                 break;
-            case 'settings':
-                console.log(settings);
+            case 'status':
+                const status = await migreat.status(settings);
+                printStatus(status);
                 break;
             default:
                 printHelp();
